@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import re
 
-data = pd.read_csv('C:/Users/Gonzalo/Desktop/CV/properati.csv')
+data = pd.read_csv('../desafio_ds/properati.csv')
 
 def expensas(df,input=0):
     if str(input) == '0':
