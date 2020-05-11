@@ -12,6 +12,12 @@ data = pd.read_csv('../desafio_ds/properati.csv')
 def pisos(df):
     cont = data['floor'].isna().sum()
     cont_orig = cont
+    mascara = (df['property_type'] == 'house') & (df['floor'].isnull())
+    df.loc[mascara,'floor'] = 0
+    resultado = cont - data['floor'].isna().sum()
+    cont = data['floor'].isna().sum()
+    print('Se completaron con el patron TYPE HOUSE: {} registros'.format(resultado))
+
     dic_piso = {'PLANTA BAJA': 0, 'PRIMER': 1, 'SEGUNDO': 2, 'TERCERO': 3, 'CUARTO': 4, 'QUINTO': 5, 'SEXTO': 6,
                 'SEPTIMO': 7, 'OCTAVO': 8, 'NOVENO': 9, 'DECIMO': 10}
     pattern = '(?P<nro>PRIMER|SEGUNDO|TERCERO|CUARTO|QUINTO|SEXTO|SEPTIMO|OCTAVO|NOVENO|DECIMO)(?P<piso>\sPISO\s)'
@@ -74,5 +80,5 @@ def pisos(df):
     print('Se completaron con el patron PLANTA BAJA: {} registros'.format(resultado))
     print('Total original de NULLs para floor: {}'.format(cont_orig))
     print('Total actual de NULLs para floor: {}'.format(cont))
-    print('Porcentaje de NULL corregidos para floor: {}%'.format(round((100-(cont * 100)/cont_orig)),0))
+    print('Porcentaje de NULLs corregidos para floor: {}%'.format(round((100-(cont * 100)/cont_orig)),0))
 pisos(data)
