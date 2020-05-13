@@ -74,3 +74,18 @@ def pisos(data):
     print('Total original de NULLs para floor: {}'.format(cont_orig))
     print('Total actual de NULLs para floor: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para floor: {}%'.format(round((100-(cont * 100)/cont_orig)),0))
+
+def precio_aprox_dolar(data):
+    cont = data['price_aprox_usd'].isna().sum()
+    cont_orig = cont
+    pattern = '(?P<moneda>(U\$S|US\$|USD|\$US|U\$D)\s)(?P<monto>\d+(\.\d+)?)'
+    patron_sin_ex = re.compile(pattern, re.IGNORECASE)
+    search = data['title'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
+    mascara_search = (search.notnull()) & data['price_aprox_usd'].isnull()
+    data.loc[mascara_search, 'price_aprox_usd'] = search[mascara_search].apply(lambda x: float(re.sub("[^0-9]","",x.group('monto'))))
+    print(data.loc[mascara_search, 'price_aprox_usd'])
+    resultado = cont - data['price_aprox_usd'].isna().sum()
+    cont = data['price_aprox_usd'].isna().sum()
+    print('Se completaron con el patron USD$: {}'.format(resultado))
+    print(data.loc[mascara_search, 'price_aprox_usd'])
+    print('Porcentaje de NULLs corregidos para price_aprox_usd: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
