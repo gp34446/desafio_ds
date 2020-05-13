@@ -83,9 +83,27 @@ def precio_aprox_dolar(data):
     search = data['title'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = (search.notnull()) & data['price_aprox_usd'].isnull()
     data.loc[mascara_search, 'price_aprox_usd'] = search[mascara_search].apply(lambda x: float(re.sub("[^0-9]","",x.group('monto'))))
-    print(data.loc[mascara_search, 'price_aprox_usd'])
     resultado = cont - data['price_aprox_usd'].isna().sum()
     cont = data['price_aprox_usd'].isna().sum()
     print('Se completaron con el patron USD$: {}'.format(resultado))
     print(data.loc[mascara_search, 'price_aprox_usd'])
     print('Porcentaje de NULLs corregidos para price_aprox_usd: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
+
+def amenities(data,lista):
+    total = data.shape[0]
+    for i in lista:
+        pattern = i
+        data[i] = False
+        patron_sin_ex = re.compile(pattern, re.IGNORECASE)
+        search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
+        mascara_search = search.notnull()
+        data.loc[mascara_search, i] = True
+        cont = data[i].sum()
+        print('Se obtuvieron {} registros con {}'.format(cont,i))
+        print('El porcentaje de propiedades con {} es {}%'.format(i,round((cont/total)*100,2),i))
+
+def m2(df):
+    cont = df['price_usd_per_m2'].isnull().sum()
+    mascara = df['price_aprox_usd'].notnull() & df['surface_covered_in_m2'].notnull() & df['price_usd_per_m2'].isnull()
+    df['price_usd_per_m2'] = df['price_aprox_usd']/ df['surface_covered_in_m2']
+    print('Registrs actualizados para price_usd_per_m2: {}' .format(cont - df['price_usd_per_m2'].isnull().sum()))
