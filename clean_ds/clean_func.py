@@ -104,10 +104,17 @@ def amenities(data,lista):
         print('El porcentaje de propiedades con {} es {}%'.format(i,round((cont/total)*100,2),i))
 
 def m2(df):
-    cont = df['price_usd_per_m2'].isnull().sum()
+    superficie_total(df)
+    precio_aprox_dolar(df)
+    cont_orig = df['price_usd_per_m2'].isnull().sum()
     mascara = df['price_aprox_usd'].notnull() & df['surface_total_in_m2'].notnull() & df['price_usd_per_m2'].isnull()
-    df['price_usd_per_m2'] = df['price_aprox_usd']/ df['surface_total_in_m2']
-    print('Registrs actualizados para price_usd_per_m2: {}' .format(cont - df['price_usd_per_m2'].isnull().sum()))
+    df.loc[mascara,'price_usd_per_m2'] = df.loc[mascara,'price_aprox_usd']/ df.loc[mascara,'surface_total_in_m2']
+
+    cont = df['price_usd_per_m2'].isnull().sum()
+    print('Registros actualizados para price_usd_per_m2: {}' .format(cont_orig - cont))
+    print('Total original de NULLs para price_usd_per_m2: {}'.format(cont_orig))
+    print('Total actual de NULLs para price_usd_per_m2: {}'.format(cont))
+    print('Porcentaje de NULLs corregidos para price_usd_per_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)),0))
 
 def superficie_cubierta(data):
     cont = data['surface_covered_in_m2'].isna().sum()
