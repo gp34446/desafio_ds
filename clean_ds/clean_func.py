@@ -5,6 +5,7 @@ import re
 def pisos(data):
     cont = data['floor'].isna().sum()
     cont_orig = cont
+
     mascara = ((data['property_type'] == 'house') | (data['property_type'] == 'store')) & (data['floor'].isnull())
     data.loc[mascara,'floor'] = 0
     resultado = cont - data['floor'].isna().sum()
@@ -172,7 +173,7 @@ def superficie_total(data):
     cont = data['surface_total_in_m2'].isna().sum()
     print('Se completaron sumando superficie descubierta con superficie cubierta: {} registros'.format(resultado))
 
-    pattern = '(?P<nro>\d{2,4}[.,]?\d*)(?P<sup>(\s?)(M2|METROS\sCUADRADOS|M²))'
+    pattern = '(?P<nro>\d{2,4}[.,]?\d*)(?P<sup>(\s?)(M\s|M2|METRO\sCUADRADOS|M²))'
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = search.notnull() & data['surface_covered_in_m2'].isnull()
@@ -192,7 +193,46 @@ def superficie_total(data):
     cont = data['surface_total_in_m2'].isna().sum()
     print('Se completaron con el patron SUPERFICIE TOTAL: {} registros'.format(resultado))
 
+    mascara = ((data['property_type'] == 'apartment')) & (data['surface_total_in_m2'].isnull()) & (data['surface_covered_in_m2'].notnull())
+    data.loc[mascara, 'surface_total_in_m2'] = data['surface_covered_in_m2']
+    resultado = cont - data['surface_covered_in_m2'].isna().sum()
+    cont = data['surface_covered_in_m2'].isna().sum()
+    print('Se completaron con el patron TYPE APARTMENT: {} registros'.format(resultado))
+
     print('Total original de NULLs para surface_total_in_m2: {}'.format(cont_orig))
     print('Total actual de NULLs para surface_total_in_m2: {}'.format(cont))
-    print('Porcentaje de NULLs corregidos para surface_total_in_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)),
-                                                                                0))
+    print('Porcentaje de NULLs corregidos para surface_total_in_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)),0))
+
+
+def expensas(data):
+    cont = data['expenses'].isna().sum()
+    cont_orig = cont
+
+    mascara = ((data['property_type'] == 'house') ) & (data['expenses'].isnull())
+    data.loc[mascara, 'expenses'] = 0
+    resultado = cont - data['expenses'].isna().sum()
+    cont = data['expenses'].isna().sum()
+    print('Se completaron con el patron TYPE HOUSE: {} registros'.format(resultado))
+
+    pattern = '(SIN\sEXPENSA|NO\sHAY\sEXPENSA|NO\sTIENE\sEXPENSA)'
+    patron_sin_ex = re.compile(pattern, re.IGNORECASE)
+    search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(re.sub('\.', '', x)))
+    mascara_search = (search.notnull()) & data['expenses'].isnull()
+    data.loc[mascara_search, 'expenses'] = 0
+    resultado = cont - data['expenses'].isna().sum()
+    cont = data['expenses'].isna().sum()
+    print('Se completaron con el patron SIN EXPENSA: {} registros'.format(resultado))
+
+    pattern = '(?P<expensa>expensa\w{1,15})(?P<monto>\d{2,4}[.,]?\d*)'
+    patron_sin_ex = re.compile(pattern,re.IGNORECASE)
+    search = data['description'].apply(lambda x:x if x is np.NaN else patron_sin_ex.search(re.sub('\.','',x)))
+    mascara_search = (search.notnull()) & data['expenses'].isnull()
+    data.loc[mascara_search,'expenses'] = search[mascara_search].apply(lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('monto')), ",", ".")), 2))
+    resultado = cont - data['expenses'].isna().sum()
+    cont = data['expenses'].isna().sum()
+    print('Se completaron con el patron EXPENSAS MONTO: {} registros'.format(resultado))
+
+    print('Total original de NULLs para expenses: {}'.format(cont_orig))
+    print('Total actual de NULLs para expenses: {}'.format(cont))
+    print('Porcentaje de NULLs corregidos para expenses: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
+
