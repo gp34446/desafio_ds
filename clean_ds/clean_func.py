@@ -87,10 +87,9 @@ def precio_aprox_dolar(data):
     resultado = cont - data['price_aprox_usd'].isna().sum()
     cont = data['price_aprox_usd'].isna().sum()
     print('Se completaron con el patron USD$: {}'.format(resultado))
-    print(data.loc[mascara_search, 'price_aprox_usd'])
     print('Porcentaje de NULLs corregidos para price_aprox_usd: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
 
-def amenities(data,lista):
+def amenities(data,lista=['pileta','terraza','cochera','patio']):
     total = data.shape[0]
     for i in lista:
         pattern = i
@@ -243,3 +242,8 @@ def expensas(data):
     print('Total actual de NULLs para expenses: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para expenses: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
 
+def completar(df):
+    expensas(df)
+    pisos(df)
+    m2(df)
+    amenities(df)
