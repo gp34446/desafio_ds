@@ -101,7 +101,7 @@ def precio_aprox_dolar(data):
     print('Total actual de NULLs para price_aprox_usd: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para price_aprox_usd: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
 
-def amenities(data,lista=['pileta','terraza','cochera','patio']):
+def amenities(data,lista=['pileta|piscina','terraza|solarium','cochera|garage','patio|jardin','laundry|lavadero','parrilla|churrasquera|asadera']):
     total = data.shape[0]
     for i in lista:
         pattern = i
@@ -110,11 +110,12 @@ def amenities(data,lista=['pileta','terraza','cochera','patio']):
         search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
         mascara_search = search.notnull()
         mascara_search2 = search.isnull()
-        data.loc[mascara_search, i] = True
-        data.loc[mascara_search2, i] = False
+        data.loc[mascara_search, i] = 1
+        data.loc[mascara_search2, i] = 0
         cont = data[i].sum()
         print('Se obtuvieron {} registros con {}'.format(cont,i))
         print('El porcentaje de propiedades con {} es {}%'.format(i,round((cont/total)*100,2),i))
+    data['amenities'] = data.iloc[:, -len(i):-1].sum(axis=1)
 
 def m2(df):
     superficie_total(df)
@@ -243,7 +244,7 @@ def expensas(data):
     cont = data['expenses'].isna().sum()
     print('Se completaron con el patron SIN EXPENSA: {} registros'.format(resultado))
 
-    pattern = '(?P<expensa>expensa\w{1,15})(?P<monto>\d{2,4}[.,]?\d*)'
+    pattern = '(?P<expensa>expensa\D{1,15})(?P<monto>\d{2,4}[.,]?\d*)'
     patron_sin_ex = re.compile(pattern,re.IGNORECASE)
     search = data['description'].apply(lambda x:x if x is np.NaN else patron_sin_ex.search(re.sub('\.','',x)))
     mascara_search = (search.notnull()) & data['expenses'].isnull()
@@ -263,8 +264,5 @@ def completar(df):
     amenities(df)
 
 def filtrar_errores(df):
-    mascara = df['price_usd_per_m2'].notnull()
-    df2 = df.loc[mascara]
-    df = df2
-    #df = df.loc[df['price_aprox_usd'] > 9999]
-    #df = df.loc[df['surface_total_in_m2'] > 9]
+    mascara = (df['price_usd_per_m2'].notnull()) & (df['price_aprox_usd'] > 9999) & (df['surface_total_in_m2'] > 19)
+    return df[mascara]
