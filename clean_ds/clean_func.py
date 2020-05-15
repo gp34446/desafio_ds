@@ -224,6 +224,9 @@ def superficie_total(data):
     print('Total actual de NULLs para surface_total_in_m2: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para surface_total_in_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)),0))
 
+    mascara = data['surface_total_in_m2'].notnull() & data['surface_covered_in_m2'].notnull()
+    data['surface_uncovered_in_m2'] = data['surface_total_in_m2'] - data['surface_covered_in_m2']
+    print('Se completaron para el campo surface_uncovered_in_m2: {} registros'.format(data['surface_uncovered_in_m2'].notnull().sum()))
 
 def expensas(data):
     cont = data['expenses'].isna().sum()
