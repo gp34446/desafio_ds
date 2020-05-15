@@ -257,11 +257,11 @@ def expensas(data):
     print('Total actual de NULLs para expenses: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para expenses: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
 
-def completar(df):
+def completar(df,lista_amenities=['pileta|piscina','terraza|solarium','cochera|garage','patio|jardin','laundry|lavadero','parrilla|churrasquera|asadera']):
     expensas(df)
     pisos(df)
     m2(df)
-    amenities(df)
+    amenities(df,lista_amenities)
 
 def filtrar_errores(df):
     mascara = (df['price_usd_per_m2'].notnull()) & (df['price_aprox_usd'] > 9999) & (df['surface_total_in_m2'] > 19)
