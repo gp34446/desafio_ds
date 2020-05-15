@@ -88,7 +88,7 @@ def precio_aprox_dolar(data):
     cont = data['price_aprox_usd'].isna().sum()
     print('Se completaron con el patron U$ MONTO TITLE: {} registros'.format(resultado))
 
-    pattern = '(?P<moneda>(U\$S|US\$|USD|\$US|U\$D)\s?)(?P<monto>\d+(\.\d+)?)'
+    pattern = '(?P<moneda>(U\$S|US\$|USD|\$US|U\$D)(\s|:|:\s)?)(?P<monto>\d+(\.\d+)?)'
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = (search.notnull()) & data['price_aprox_usd'].isnull()
@@ -133,7 +133,7 @@ def m2(df):
 def superficie_cubierta(data):
     cont = data['surface_covered_in_m2'].isna().sum()
     cont_orig = cont
-    pattern = '(?P<sup>\sCUBIERT(A|O)\s)(?P<nro>\d{2,4}[.,]?\d*)'
+    pattern = '(?P<sup>\sCUBIERT(A|O|AS|OS)(\s|:|:\s)?)(?P<nro>\d{2,4}[.,]?\d*)'
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = (search.notnull()) & data['surface_covered_in_m2'].isnull()
@@ -142,7 +142,7 @@ def superficie_cubierta(data):
     cont = data['surface_covered_in_m2'].isna().sum()
     print('Se completaron con el patron CUBIERTA NRO: {} registros'.format(resultado))
 
-    pattern = '(?P<nro>\d{2,4}[.,]?\d*)(?P<sup>\sCUBIERT(A|O)\s)'
+    pattern = '(?P<nro>\d{2,4}[.,]?\d*)(?P<sup>\sCUBIERT(A|O))'
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = (search.notnull()) & data['surface_covered_in_m2'].isnull()
@@ -152,7 +152,7 @@ def superficie_cubierta(data):
     cont = data['surface_covered_in_m2'].isna().sum()
     print('Se completaron con el patron NRO CUBIERTA: {} registros'.format(resultado))
 
-    pattern = '(?P<nro>\d{2,4}[.,]?\d*)(?P<sup>\sconstruido\s)'
+    pattern = '(?P<nro>\d{2,4}[.,]?\d*)(?P<sup>\sconstruido)'
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = (search.notnull()) & data['surface_covered_in_m2'].isnull()
@@ -171,7 +171,7 @@ def superficie_total(data):
     cont_orig = cont
     superficie_cubierta(data)
 
-    pattern = '(?P<sup>\sDESCUBIERT(A|O)\s)(?P<nro>\d{2,4}[.,]?\d*)'
+    pattern = '(?P<sup>\sDESCUBIERT(A|O|OS|AS)(\s|:|:\s)?)(?P<nro>\d{2,4}[.,]?\d*)'
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = search.notnull()
@@ -180,7 +180,7 @@ def superficie_total(data):
     resultado = data['surface_uncovered_in_m2'].notnull().sum()
     print('Se completaron con el patron DESCUBIERTA NRO: {} registros'.format(resultado))
 
-    pattern = '(?P<nro>\d{2,4}[.,]?\d*)(?P<sup>\sDESCUBIERT(A|O)\s)'
+    pattern = '(?P<nro>\d{2,4}[.,]?\d*)(?P<sup>\sDESCUBIERT(A|O))'
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = search.notnull() & data['surface_uncovered_in_m2'].isnull()
@@ -204,7 +204,7 @@ def superficie_total(data):
     cont = data['surface_total_in_m2'].isna().sum()
     print('Se completaron con el patron M2: {} registros'.format(resultado))
 
-    pattern = '(?P<sup>(\s?)SUPERFICIE\sTOTAL\s)(?P<nro>\d{2,4}[.,]?\d*)'
+    pattern = '(?P<sup>(\s?)SUPERFICIE\sTOTAL(\s|:|:\s)?)(?P<nro>\d{2,4}[.,]?\d*)'
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = search.notnull() & data['surface_covered_in_m2'].isnull()
