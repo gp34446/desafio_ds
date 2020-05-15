@@ -261,3 +261,10 @@ def completar(df):
     pisos(df)
     m2(df)
     amenities(df)
+
+def filtrar_errores(df):
+    mascara = df['price_usd_per_m2'].notnull()
+    df2 = df.loc[mascara]
+    df = df2
+    #df = df.loc[df['price_aprox_usd'] > 9999]
+    #df = df.loc[df['surface_total_in_m2'] > 9]
