@@ -97,7 +97,9 @@ def amenities(data,lista=['pileta','terraza','cochera','patio']):
         patron_sin_ex = re.compile(pattern, re.IGNORECASE)
         search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
         mascara_search = search.notnull()
+        mascara_search2 = search.isnull()
         data.loc[mascara_search, i] = True
+        data.loc[mascara_search2, i] = False
         cont = data[i].sum()
         print('Se obtuvieron {} registros con {}'.format(cont,i))
         print('El porcentaje de propiedades con {} es {}%'.format(i,round((cont/total)*100,2),i))
