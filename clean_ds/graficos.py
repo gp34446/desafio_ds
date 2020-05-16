@@ -6,7 +6,9 @@ import seaborn as sns
 from clean_ds import clean_func as cf
 pd.set_option('display.max_columns', None)
 
-data = pd.read_csv('C:/Users/Gonzalo/dh/curso/ds_blend_students_2020/desafio_ds/df_aux.csv')
+data = pd.read_csv('C:/dh/curso/ds_blend_students_2020/desafio_ds/df_aux.csv')
+
+##data = pd.read_csv('C:/dh/desafio_ds/properati_clean.csv')
 
 mask_provincia = data['state_name'].isin(['Bs.As. G.B.A. Zona Sur', 'Bs.As. G.B.A. Zona Norte', 'Bs.As. G.B.A. Zona Oeste'])
 data = data.loc[mask_provincia]
@@ -21,10 +23,17 @@ print(g)
 
 sns.set(style="whitegrid")
 
-graph = sns.catplot(x="Barrio", y="Media M2 USD", hue="Zona", data=g,
+graph = sns.catplot(x="Barrio", y="Media M2 USD", hue="Zona", legend=False, data=g,
                 height=6, kind="bar", palette="muted")
+
 graph.despine(left=True)
 graph.set_ylabels("Media M2 USD Barrios Gran BsAs")
+
+plt.legend(loc="upper right")
+graph.set_xticklabels(g['Barrio'], rotation=45, horizontalalignment='right',
+    fontweight='light',
+    fontsize=8)
+
 plt.show()
 
 
