@@ -2,12 +2,13 @@ import numpy as np
 import pandas as pd
 import re
 
+
 def pisos(data):
     cont = data['floor'].isna().sum()
     cont_orig = cont
 
     mascara = ((data['property_type'] == 'house') | (data['property_type'] == 'store')) & (data['floor'].isnull())
-    data.loc[mascara,'floor'] = 0
+    data.loc[mascara, 'floor'] = 0
     resultado = cont - data['floor'].isna().sum()
     cont = data['floor'].isna().sum()
     print('Se completaron con el patron TYPE HOUSE: {} registros'.format(resultado))
@@ -74,7 +75,8 @@ def pisos(data):
     print('Se completaron con el patron PLANTA BAJA: {} registros'.format(resultado))
     print('Total original de NULLs para floor: {}'.format(cont_orig))
     print('Total actual de NULLs para floor: {}'.format(cont))
-    print('Porcentaje de NULLs corregidos para floor: {}%'.format(round((100-(cont * 100)/cont_orig)),0))
+    print('Porcentaje de NULLs corregidos para floor: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
+
 
 def precio_aprox_dolar(data):
     cont = data['price_aprox_usd'].isna().sum()
@@ -83,7 +85,8 @@ def precio_aprox_dolar(data):
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['title'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = (search.notnull()) & data['price_aprox_usd'].isnull()
-    data.loc[mascara_search, 'price_aprox_usd'] = search[mascara_search].apply(lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('monto')),",",".")),2))
+    data.loc[mascara_search, 'price_aprox_usd'] = search[mascara_search].apply(
+        lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('monto')), ",", ".")), 2))
     resultado = cont - data['price_aprox_usd'].isna().sum()
     cont = data['price_aprox_usd'].isna().sum()
     print('Se completaron con el patron U$ MONTO TITLE: {} registros'.format(resultado))
@@ -101,7 +104,9 @@ def precio_aprox_dolar(data):
     print('Total actual de NULLs para price_aprox_usd: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para price_aprox_usd: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
 
-def amenities(data,lista=['pileta|piscina','terraza|solarium','cochera|garage','patio|jardin','laundry|lavadero','parrilla|churrasquera|asadera']):
+
+def amenities(data, lista=['pileta|piscina', 'terraza|solarium', 'cochera|garage', 'patio|jardin', 'laundry|lavadero',
+                           'parrilla|churrasquera|asadera', 'zoom']):
     total = data.shape[0]
     for i in lista:
         pattern = i
@@ -113,22 +118,25 @@ def amenities(data,lista=['pileta|piscina','terraza|solarium','cochera|garage','
         data.loc[mascara_search, i] = 1
         data.loc[mascara_search2, i] = 0
         cont = data[i].sum()
-        print('Se obtuvieron {} registros con {}'.format(cont,i))
-        print('El porcentaje de propiedades con {} es {}%'.format(i,round((cont/total)*100,2),i))
-    data['amenities'] = data.iloc[:, -len(i):-1].sum(axis=1)
+        print('Se obtuvieron {} registros con {}'.format(cont, i))
+        print('El porcentaje de propiedades con {} es {}%'.format(i, round((cont / total) * 100, 2), i))
+    data['amenities'] = data[lista].sum(axis=1)
+
 
 def m2(df):
     superficie_total(df)
     precio_aprox_dolar(df)
     cont_orig = df['price_usd_per_m2'].isnull().sum()
     mascara = df['price_aprox_usd'].notnull() & df['surface_total_in_m2'].notnull() & df['price_usd_per_m2'].isnull()
-    df.loc[mascara,'price_usd_per_m2'] = df.loc[mascara,'price_aprox_usd']/ df.loc[mascara,'surface_total_in_m2']
+    df.loc[mascara, 'price_usd_per_m2'] = df.loc[mascara, 'price_aprox_usd'] / df.loc[mascara, 'surface_total_in_m2']
 
     cont = df['price_usd_per_m2'].isnull().sum()
-    print('Registros actualizados para price_usd_per_m2: {}' .format(cont_orig - cont))
+    print('Registros actualizados para price_usd_per_m2: {}'.format(cont_orig - cont))
     print('Total original de NULLs para price_usd_per_m2: {}'.format(cont_orig))
     print('Total actual de NULLs para price_usd_per_m2: {}'.format(cont))
-    print('Porcentaje de NULLs corregidos para price_usd_per_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)),0))
+    print(
+        'Porcentaje de NULLs corregidos para price_usd_per_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
+
 
 def superficie_cubierta(data):
     cont = data['surface_covered_in_m2'].isna().sum()
@@ -137,7 +145,8 @@ def superficie_cubierta(data):
     patron_sin_ex = re.compile(pattern, re.IGNORECASE)
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = (search.notnull()) & data['surface_covered_in_m2'].isnull()
-    data.loc[mascara_search, 'surface_covered_in_m2'] = search[mascara_search].apply(lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('nro')),",",".")),2))
+    data.loc[mascara_search, 'surface_covered_in_m2'] = search[mascara_search].apply(
+        lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('nro')), ",", ".")), 2))
     resultado = cont - data['surface_covered_in_m2'].isna().sum()
     cont = data['surface_covered_in_m2'].isna().sum()
     print('Se completaron con el patron CUBIERTA NRO: {} registros'.format(resultado))
@@ -147,7 +156,7 @@ def superficie_cubierta(data):
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = (search.notnull()) & data['surface_covered_in_m2'].isnull()
     data.loc[mascara_search, 'surface_covered_in_m2'] = search[mascara_search].apply(
-        lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('nro')),",",".")),2))
+        lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('nro')), ",", ".")), 2))
     resultado = cont - data['surface_covered_in_m2'].isna().sum()
     cont = data['surface_covered_in_m2'].isna().sum()
     print('Se completaron con el patron NRO CUBIERTA: {} registros'.format(resultado))
@@ -157,14 +166,17 @@ def superficie_cubierta(data):
     search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(x))
     mascara_search = (search.notnull()) & data['surface_covered_in_m2'].isnull()
     data.loc[mascara_search, 'surface_covered_in_m2'] = search[mascara_search].apply(
-        lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('nro')),",",".")),2))
+        lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('nro')), ",", ".")), 2))
     resultado = cont - data['surface_covered_in_m2'].isna().sum()
     cont = data['surface_covered_in_m2'].isna().sum()
     print('Se completaron con el patron NRO CONSTRUIDO: {} registros'.format(resultado))
 
     print('Total original de NULLs para surface_covered_in_m2: {}'.format(cont_orig))
     print('Total actual de NULLs para surface_covered_in_m2: {}'.format(cont))
-    print('Porcentaje de NULLs corregidos para surface_covered_in_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
+    print(
+        'Porcentaje de NULLs corregidos para surface_covered_in_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)),
+                                                                                0))
+
 
 def superficie_total(data):
     cont = data['surface_total_in_m2'].isna().sum()
@@ -188,8 +200,10 @@ def superficie_total(data):
         lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('nro')), ",", ".")), 2))
     print('Se completaron con el patron NRO DESCUBIERTA : {} registros'.format(resultado))
 
-    mascara_search = data['surface_uncovered_in_m2'].notnull() & data['surface_covered_in_m2'].notnull() & data['surface_total_in_m2'].isnull()
-    data.loc[mascara_search,'surface_total_in_m2'] = data.loc[mascara_search,'surface_covered_in_m2'] + data.loc[mascara_search,'surface_uncovered_in_m2']
+    mascara_search = data['surface_uncovered_in_m2'].notnull() & data['surface_covered_in_m2'].notnull() & data[
+        'surface_total_in_m2'].isnull()
+    data.loc[mascara_search, 'surface_total_in_m2'] = data.loc[mascara_search, 'surface_covered_in_m2'] + data.loc[
+        mascara_search, 'surface_uncovered_in_m2']
     resultado = cont - data['surface_total_in_m2'].isna().sum()
     cont = data['surface_total_in_m2'].isna().sum()
     print('Se completaron sumando superficie descubierta con superficie cubierta: {} registros'.format(resultado))
@@ -214,7 +228,8 @@ def superficie_total(data):
     cont = data['surface_total_in_m2'].isna().sum()
     print('Se completaron con el patron SUPERFICIE TOTAL: {} registros'.format(resultado))
 
-    mascara = ((data['property_type'] == 'apartment')) & (data['surface_total_in_m2'].isnull()) & (data['surface_covered_in_m2'].notnull())
+    mascara = ((data['property_type'] == 'apartment')) & (data['surface_total_in_m2'].isnull()) & (
+        data['surface_covered_in_m2'].notnull())
     data.loc[mascara, 'surface_total_in_m2'] = data['surface_covered_in_m2']
     resultado = cont - data['surface_covered_in_m2'].isna().sum()
     cont = data['surface_covered_in_m2'].isna().sum()
@@ -222,17 +237,20 @@ def superficie_total(data):
 
     print('Total original de NULLs para surface_total_in_m2: {}'.format(cont_orig))
     print('Total actual de NULLs para surface_total_in_m2: {}'.format(cont))
-    print('Porcentaje de NULLs corregidos para surface_total_in_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)),0))
+    print('Porcentaje de NULLs corregidos para surface_total_in_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)),
+                                                                                0))
 
     mascara = data['surface_total_in_m2'].notnull() & data['surface_covered_in_m2'].notnull()
     data['surface_uncovered_in_m2'] = data['surface_total_in_m2'] - data['surface_covered_in_m2']
-    print('Se completaron para el campo surface_uncovered_in_m2: {} registros'.format(data['surface_uncovered_in_m2'].notnull().sum()))
+    print('Se completaron para el campo surface_uncovered_in_m2: {} registros'.format(
+        data['surface_uncovered_in_m2'].notnull().sum()))
+
 
 def expensas(data):
     cont = data['expenses'].isna().sum()
     cont_orig = cont
 
-    mascara = ((data['property_type'] == 'house') ) & (data['expenses'].isnull())
+    mascara = (data['property_type'] == 'house') & (data['expenses'].isnull())
     data.loc[mascara, 'expenses'] = 0
     resultado = cont - data['expenses'].isna().sum()
     cont = data['expenses'].isna().sum()
@@ -248,10 +266,11 @@ def expensas(data):
     print('Se completaron con el patron SIN EXPENSA: {} registros'.format(resultado))
 
     pattern = '(?P<expensa>expensa\D{1,15})(?P<monto>\d{2,4}[.,]?\d*)'
-    patron_sin_ex = re.compile(pattern,re.IGNORECASE)
-    search = data['description'].apply(lambda x:x if x is np.NaN else patron_sin_ex.search(re.sub('\.','',x)))
+    patron_sin_ex = re.compile(pattern, re.IGNORECASE)
+    search = data['description'].apply(lambda x: x if x is np.NaN else patron_sin_ex.search(re.sub('\.', '', x)))
     mascara_search = (search.notnull()) & data['expenses'].isnull()
-    data.loc[mascara_search,'expenses'] = search[mascara_search].apply(lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('monto')), ",", ".")), 2))
+    data.loc[mascara_search, 'expenses'] = search[mascara_search].apply(
+        lambda x: round(float(str.replace(re.sub("[^0-9\,]", "", x.group('monto')), ",", ".")), 2))
     resultado = cont - data['expenses'].isna().sum()
     cont = data['expenses'].isna().sum()
     print('Se completaron con el patron EXPENSAS MONTO: {} registros'.format(resultado))
@@ -259,6 +278,8 @@ def expensas(data):
     print('Total original de NULLs para expenses: {}'.format(cont_orig))
     print('Total actual de NULLs para expenses: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para expenses: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
+
+
 def rooms(df):
     cont = df['rooms'].isna().sum()
     cont_orig = cont
@@ -312,44 +333,75 @@ def rooms(df):
     print('Total original de NULLs para rooms: {}'.format(cont_orig))
     print('Total actual de NULLs para rooms: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para rooms: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
-def completar(df,lista_amenities=['pileta|piscina','terraza|solarium','cochera|garage','patio|jardin','laundry|lavadero','parrilla|churrasquera|asadera']):
+
+
+def completar(df, lista_amenities=['pileta|piscina', 'terraza|solarium', 'cochera|garage', 'patio|jardin',
+                                   'laundry|lavadero', 'parrilla|churrasquera|asadera']):
     df2 = df
     expensas(df)
     pisos(df)
     rooms(df)
     m2(df)
-    amenities(df,lista_amenities)
+    amenities(df, lista_amenities)
     campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
               'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
     print('-------------------SITUACION INICIAL-------------------------')
-    print(round(df2[campos].isnull().sum()/df2.shape[0] * 100),2)
+    print(round(df2[campos].isnull().sum() / df2.shape[0] * 100), 2)
     print('-------------------SITUACION ACTUAL-------------------------')
-    print(round(df[campos].isnull().sum()/df.shape[0] * 100), 2)
+    print(round(df[campos].isnull().sum() / df.shape[0] * 100), 2)
     print('--------------------------------------------')
+
 
 def filtrar_errores(df):
     cont = df.shape[0]
     campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
               'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
-    df2=df
+    df2 = df
     mascara = (df['price_usd_per_m2'].notnull()) & (df['price_aprox_usd'] > 9999) & (df['surface_total_in_m2'] > 19)
-    print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2' .format(cont - df2.shape[0]))
+    print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2'.format(cont - df2.shape[0]))
     print('-------------------SITUACION INICIAL-------------------------')
     print('-------------------%NULLS-------------------------')
-    print(round(df2[campos].isnull().sum()/df2.shape[0] * 100), 2)
+    print(round(df2[campos].isnull().sum() / df2.shape[0] * 100), 2)
     print('-------------------CANTIDAD DE REGISTROS-------------------------')
     print(df2[campos].count())
     print('-------------------SITUACION ACTUAL-------------------------')
     print('-------------------%NULLS-------------------------')
-    print(round(df.loc[mascara,campos].isnull().sum()/df.shape[0] * 100), 2)
+    print(round(df.loc[campos].isnull().sum() / df.shape[0] * 100), 2)
     print('-------------------CANTIDAD DE REGISTROS-------------------------')
     print(df[campos].count())
     print('--------------------------------------------')
 
     return df[mascara]
+
+
+def imputar_floor_room(df):
+    g = df.groupby(['state_name', 'place_name']).agg({'rooms': 'mean', 'floor': 'mean'})
+    g = pd.DataFrame(g)
+    g = g.add_suffix('_mean').reset_index()
+    g = g.fillna(0)
+    df2 = df.merge(how='inner', right=g, on=['state_name', 'place_name'])
+    mascara_rooms = df2['rooms'].isnull()
+    mascara_floor = df2['floor'].isnull()
+    df2.loc[mascara_rooms, 'rooms'] = df2.loc[mascara_rooms, 'rooms_mean'].apply(lambda x: round(x))
+    df2.loc[mascara_floor, 'floor'] = df2.loc[mascara_floor, 'floor_mean'].apply(lambda x: round(x))
+    df2 = df2.drop(['rooms_mean', 'floor_mean'], axis=1)
+    campos = ['rooms', 'floor']
+    print('-------------------SITUACION INICIAL-------------------------')
+    print('-------------------%NULLS-------------------------')
+    print(round(df[campos].isnull().sum() / df.shape[0] * 100), 2)
+    print('-------------------CANTIDAD DE REGISTROS-------------------------')
+    print(df[campos].count())
+    print('-------------------SITUACION ACTUAL-------------------------')
+    print('-------------------%NULLS-------------------------')
+    print(round(df2.loc[campos].isnull().sum() / df2.shape[0] * 100), 2)
+    print('-------------------CANTIDAD DE REGISTROS-------------------------')
+    print(df2[campos].count())
+    print('--------------------------------------------')
+    df = df2
 def df_gen(df):
     pd.set_option('display.max_columns', None)
     completar(df)
     df2 = filtrar_errores(df)
+    imputar_floor_room(df2)
     df2.to_csv('../desafio_ds/df_clean.csv')
     pd.set_option('display.max_columns', 5)
