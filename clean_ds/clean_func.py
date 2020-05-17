@@ -336,10 +336,10 @@ def filtrar_errores(df):
     print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2' .format(cont - df2.shape[0]))
     print('-------------------SITUACION INICIAL-------------------------')
     print(round(df2[campos].isnull().sum()/df2.shape[0] * 100), 2)
-    print(df2[campos].describe())
+    print(df2[campos].count())
     print('-------------------SITUACION ACTUAL-------------------------')
     print(round(df.loc[mascara,campos].isnull().sum()/df.shape[0] * 100), 2)
-    print(df[campos].describe())
+    print(df[campos].count())
     print('--------------------------------------------')
 
     return df[mascara]
