@@ -313,12 +313,34 @@ def rooms(df):
     print('Total actual de NULLs para rooms: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para rooms: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
 def completar(df,lista_amenities=['pileta|piscina','terraza|solarium','cochera|garage','patio|jardin','laundry|lavadero','parrilla|churrasquera|asadera']):
+    df2 = df
     expensas(df)
     pisos(df)
     rooms(df)
     m2(df)
     amenities(df,lista_amenities)
+    campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
+              'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
+    print('-------------------SITUACION INICIAL-------------------------')
+    print(round(df2[campos].isnull().sum()/df2.shape[0] * 100),0)
+    print('-------------------SITUACION ACTUAL-------------------------')
+    print(round(df[campos].isnull().sum()/df.shape[0] * 100), 0)
+    print('--------------------------------------------')
 
 def filtrar_errores(df):
+    cont = df.shape[0]
+    campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
+              'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
+    df2=df
     mascara = (df['price_usd_per_m2'].notnull()) & (df['price_aprox_usd'] > 9999) & (df['surface_total_in_m2'] > 19)
+    print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2' .format(cont - df.shape[0]))
+    print('-------------------SITUACION INICIAL-------------------------')
+    print(round(df2[campos].isnull().sum()/df2.shape[0] * 100), 0)
+    print('-------------------SITUACION ACTUAL-------------------------')
+    print(round(df.loc[mascara,campos].isnull().sum()/df.shape[0] * 100), 0)
+    print('--------------------------------------------')
     return df[mascara]
+def df_gen(df):
+    completar(df)
+    df2 = filtrar_errores(df)
+    df2.to_csv('../desafio_ds/df_clean.csv')
