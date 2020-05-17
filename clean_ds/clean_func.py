@@ -259,10 +259,63 @@ def expensas(data):
     print('Total original de NULLs para expenses: {}'.format(cont_orig))
     print('Total actual de NULLs para expenses: {}'.format(cont))
     print('Porcentaje de NULLs corregidos para expenses: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
+def rooms(df):
+    cont = df['rooms'].isna().sum()
+    cont_orig = cont
 
+    pattern_ambientes_num = "(?P<rooms>\d)\s(AMBIENTE|AMBIENTES|AMB|AMBS|AMBIENT|AMBIENTS)"
+    ambientes_num_regex = re.compile(pattern_ambientes_num, re.IGNORECASE)
+    ambientes_num_search = df.description.apply(lambda x: x if x is np.NaN else ambientes_num_regex.search(x))
+    ambientes_num_mask = (ambientes_num_search.notnull()) & (df.rooms.isnull())
+    df.loc[ambientes_num_mask, "rooms"] = ambientes_num_search[ambientes_num_mask].apply(
+        lambda x: x.group("rooms"))
+
+    resultado = cont - df['rooms'].isna().sum()
+    cont = df['rooms'].isna().sum()
+    print('Se completaron con el patron AMBIENTES: {} registros'.format(resultado))
+
+    pattern_monoambientes_num = "(?P<monos>MONOAMBIENTE|MONOAMBIENTES|MONO|MONOS|MONOAMB|MONOAMBS)"
+    monoambientes_num_regex = re.compile(pattern_monoambientes_num, re.IGNORECASE)
+    monoambientes_num_search = df.description.apply(lambda x: x if x is np.NaN else monoambientes_num_regex.search(x))
+    monoambientes_mask = (monoambientes_num_search.notnull()) & (df.rooms.isnull())
+    df.loc[monoambientes_mask, "rooms"] = 1
+
+    resultado = cont - df['rooms'].isna().sum()
+    cont = df['rooms'].isna().sum()
+    print('Se completaron con el patron MONOAMBIENTES: {} registros'.format(resultado))
+
+    pattern_habitaciones_num = "(?P<habitaciones>\d)\s(HABITACION|HABITACIONES|HAB|CUARTOS|CUARTO)"
+    habitaciones_num_regex = re.compile(pattern_habitaciones_num, re.IGNORECASE)
+    habitaciones_num_search = df.description.apply(lambda x: x if x is np.NaN else habitaciones_num_regex.search(x))
+    habitaciones_mask = (habitaciones_num_search.notnull()) & (df.rooms.isnull())
+    df.loc[habitaciones_mask, "rooms"] = (habitaciones_num_search[habitaciones_mask].apply(
+        lambda x: x.group("habitaciones")).astype(int)) + 1
+
+    resultado = cont - df['rooms'].isna().sum()
+    cont = df['rooms'].isna().sum()
+    print('Se completaron con el patron HABITACIONES: {} registros'.format(resultado))
+
+    dic_ambientes = {'UN': 1, 'DOS': 2, 'TRES': 3, 'CUATRO': 4, 'CINCO': 5, 'SEIS': 6, 'SIETE': 7, 'OCHO': 8,
+                     'NUEVE': 9, 'DIEZ': 10}
+    pattern_ambientes_letters = "(?P<rooms_letters>UN|DOS|TRES|CUATRO|CINCO|SEIS|SIETE|OCHO|NUEVE|DIEZ)\s?(?P<rooms_amb>AMBIENTE|AMBIENTES|AMB|AMBS|AMBIENT|AMBIENTS|HABITACION|HABITACIONES|HAB|CUARTOS|CUARTO)\s?"
+    ambientes_letters_regex = re.compile(pattern_ambientes_letters, re.IGNORECASE)
+
+    ambientes_letters_search = df.description.apply(lambda x: x if x is np.NaN else ambientes_letters_regex.search(x))
+    ambientes_letters_mask = (ambientes_letters_search.notnull()) & (df.rooms.isnull())
+
+    df.loc[ambientes_letters_mask, "rooms"] = (ambientes_letters_search[ambientes_letters_mask].apply(
+        lambda x: int(dic_ambientes[str.upper(x.group('rooms_letters'))])))
+
+    resultado = cont - df['rooms'].isna().sum()
+    cont = df['rooms'].isna().sum()
+    print('Se completaron con el patron HABITACIONES UN DOS TRES: {} registros'.format(resultado))
+    print('Total original de NULLs para rooms: {}'.format(cont_orig))
+    print('Total actual de NULLs para rooms: {}'.format(cont))
+    print('Porcentaje de NULLs corregidos para rooms: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
 def completar(df,lista_amenities=['pileta|piscina','terraza|solarium','cochera|garage','patio|jardin','laundry|lavadero','parrilla|churrasquera|asadera']):
     expensas(df)
     pisos(df)
+    rooms(df)
     m2(df)
     amenities(df,lista_amenities)
 
