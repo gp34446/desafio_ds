@@ -370,22 +370,23 @@ def filtrar_errores(df):
     print(df.loc[mascara, campos].count())
     print('--------------------------------------------')
     return df[mascara]
-
-
 def imputar_floor_room(ruta='../desafio_ds/df_clean.csv'):
     data = pd.read_csv(ruta)
-    g = data.groupby(['state_name', 'place_name']).agg({'floor': 'mean', 'rooms': 'mean'})
+    g = data.groupby(['state_name', 'place_name']).agg({'expenses': 'mean','floor': 'mean', 'rooms': 'mean'})
     g = pd.DataFrame(g)
     g = g.add_suffix('_mean').reset_index()
     g = g.fillna(0)
     data2 = data.merge(how='inner', right=g, on=['state_name', 'place_name'])
     mascara_rooms = data2['rooms'].isnull()
     mascara_floor = data2['floor'].isnull()
+    mascara_ex = data2['expenses'].isnull()
     data2.loc[mascara_rooms, 'rooms'] = data2.loc[mascara_rooms, 'rooms_mean'].apply(lambda x: round(x))
     data2.loc[mascara_floor, 'floor'] = data2.loc[mascara_floor, 'floor_mean'].apply(lambda x: round(x))
+    data2.loc[mascara_ex, 'expenses'] = data2.loc[mascara_ex, 'expenses_mean'].apply(lambda x: round(x))
     print("{} valores imputados para rooms".format(mascara_rooms.sum()))
     print("{} valores imputados para floor".format(mascara_floor.sum()))
-    data3 = data2.drop(['floor_mean', 'rooms_mean'], axis=1)
+    print("{} valores imputados para expenses".format(mascara_ex.sum()))
+    data3 = data2.drop(['expenses_mean','floor_mean', 'rooms_mean'], axis=1)
     data3.to_csv(ruta)
     print(round(data3.isnull().sum() / data3.shape[0] * 100), 2)
 def df_gen(df):
