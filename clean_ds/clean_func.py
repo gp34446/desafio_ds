@@ -353,12 +353,11 @@ def completar(df, lista_amenities=['pileta|piscina', 'terraza|solarium', 'cocher
 
 
 def filtrar_errores(df):
-    cont = df.shape[0]
     campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
               'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
     df2 = df
     mascara = (df['price_usd_per_m2'].notnull()) & (df['price_aprox_usd'] > 9999) & (df['surface_total_in_m2'] > 19)
-    print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2'.format(cont - df2.shape[0]))
+    print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2'.format(df[mascara].shape[0] - df2.shape[0]))
     print('-------------------SITUACION INICIAL-------------------------')
     print('-------------------%NULLS-------------------------')
     print(round(df2[campos].isnull().sum() / df2.shape[0] * 100), 2)
@@ -366,13 +365,11 @@ def filtrar_errores(df):
     print(df2[campos].count())
     print('-------------------SITUACION ACTUAL-------------------------')
     print('-------------------%NULLS-------------------------')
-    print(round(df.loc[campos].isnull().sum() / df.shape[0] * 100), 2)
+    print(round(df.loc[mascara,campos].isnull().sum() / df.shape[0] * 100), 2)
     print('-------------------CANTIDAD DE REGISTROS-------------------------')
-    print(df[campos].count())
+    print(df[mascara,campos].count())
     print('--------------------------------------------')
-
     return df[mascara]
-
 
 def imputar_floor_room(df):
     g = df.groupby(['state_name', 'place_name']).agg({'rooms': 'mean', 'floor': 'mean'})
@@ -386,16 +383,18 @@ def imputar_floor_room(df):
     df2.loc[mascara_floor, 'floor'] = df2.loc[mascara_floor, 'floor_mean'].apply(lambda x: round(x))
     df2 = df2.drop(['rooms_mean', 'floor_mean'], axis=1)
     campos = ['rooms', 'floor']
+    print('Se imputaron {} valores para rooms ' .format(mascara_rooms.sum()))
+    print('Se imputaron {} valores para floor '.format(mascara_floor.sum()))
     print('-------------------SITUACION INICIAL-------------------------')
     print('-------------------%NULLS-------------------------')
-    print(round(df[campos].isnull().sum() / df.shape[0] * 100), 2)
+    print(round(df.loc[campos].isnull().sum() / df.shape[0] * 100), 2)
     print('-------------------CANTIDAD DE REGISTROS-------------------------')
-    print(df[campos].count())
+    print(df.loc[campos].count())
     print('-------------------SITUACION ACTUAL-------------------------')
     print('-------------------%NULLS-------------------------')
     print(round(df2.loc[campos].isnull().sum() / df2.shape[0] * 100), 2)
     print('-------------------CANTIDAD DE REGISTROS-------------------------')
-    print(df2[campos].count())
+    print(df2.loc[campos].count())
     print('--------------------------------------------')
     df = df2
 def df_gen(df):
