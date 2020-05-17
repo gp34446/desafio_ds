@@ -333,14 +333,19 @@ def filtrar_errores(df):
               'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
     df2=df
     mascara = (df['price_usd_per_m2'].notnull()) & (df['price_aprox_usd'] > 9999) & (df['surface_total_in_m2'] > 19)
-    print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2' .format(cont - df.shape[0]))
+    print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2' .format(cont - df2.shape[0]))
     print('-------------------SITUACION INICIAL-------------------------')
     print(round(df2[campos].isnull().sum()/df2.shape[0] * 100), 2)
+    print(df2[campos].describe())
     print('-------------------SITUACION ACTUAL-------------------------')
     print(round(df.loc[mascara,campos].isnull().sum()/df.shape[0] * 100), 2)
+    print(df[campos].describe())
     print('--------------------------------------------')
+
     return df[mascara]
 def df_gen(df):
+    pd.set_option('display.max_columns', None)
     completar(df)
     df2 = filtrar_errores(df)
     df2.to_csv('../desafio_ds/df_clean.csv')
+    pd.set_option('display.max_columns', 5)
