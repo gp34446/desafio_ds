@@ -387,6 +387,7 @@ def imputar_floor_room(ruta='../desafio_ds/df_clean.csv'):
     print("{} valores imputados para floor".format(mascara_floor.sum()))
     data3 = data2.drop(['floor_mean', 'rooms_mean'], axis=1)
     data3.to_csv(ruta)
+    print(round(data3.isnull().sum() / data3.shape[0] * 100), 2)
 def df_gen(df):
     pd.set_option('display.max_columns', None)
     completar(df)
@@ -394,4 +395,4 @@ def df_gen(df):
     df2.to_csv('../desafio_ds/df_clean.csv')
     imputar_floor_room()
     pd.set_option('display.max_columns', 5)
-    print(round(df.isnull().sum() / df.shape[0] * 100), 2)
+
