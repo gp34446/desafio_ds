@@ -127,7 +127,7 @@ def m2(df):
     superficie_total(df)
     precio_aprox_dolar(df)
     cont_orig = df['price_usd_per_m2'].isnull().sum()
-    mascara = df['price_aprox_usd'].notnull() & df['surface_total_in_m2'].notnull() & df['price_usd_per_m2'].isnull()
+    mascara = df['price_aprox_usd'].notnull() & df['surface_total_in_m2'].notnull() & (df['price_usd_per_m2'].isnull() & df['price_usd_per_m2'] > 25000)
     df.loc[mascara, 'price_usd_per_m2'] = df.loc[mascara, 'price_aprox_usd'] / df.loc[mascara, 'surface_total_in_m2']
 
     cont = df['price_usd_per_m2'].isnull().sum()
