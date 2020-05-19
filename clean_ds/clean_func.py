@@ -355,7 +355,9 @@ def completar(df, lista_amenities=['pileta|piscina', 'terraza|solarium', 'cocher
 def filtrar_errores(df):
     campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
               'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
-    mascara = (df['price_usd_per_m2'].notnull()) & (df['price_usd_per_m2'] < 24000) & (df['price_aprox_usd'] > 9999) & (df['surface_total_in_m2'] > 19)
+    mascara = (df['price_usd_per_m2'].notnull()) &\
+              ((df['price_usd_per_m2'] < 10000 & df['place_name'].notin(['Puerto Madero','Palermo Chico'])) | (df['place_name'].isin(['Puerto Madero','Palermo Chico'])))\
+              & (df['price_aprox_usd'] > 9999)
     print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2'.format(
         df.shape[0] - df[mascara].shape[0]))
     print('-------------------SITUACION INICIAL-------------------------')
