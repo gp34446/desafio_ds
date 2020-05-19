@@ -337,16 +337,16 @@ def rooms(df):
 
 def completar(df, lista_amenities=['pileta|piscina', 'terraza|solarium', 'cochera|garage', 'patio|jardin',
                                    'laundry|lavadero', 'parrilla|churrasquera|asadera']):
-    df2 = df
+    campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
+              'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
+    aux = round(df[campos].isnull().sum() / df.shape[0] * 100), 2
     expensas(df)
     pisos(df)
     rooms(df)
     m2(df)
     amenities(df, lista_amenities)
-    campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
-              'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
     print('-------------------SITUACION INICIAL-------------------------')
-    print(round(df2[campos].isnull().sum() / df2.shape[0] * 100), 2)
+    print(aux)
     print('-------------------SITUACION ACTUAL-------------------------')
     print(round(df[campos].isnull().sum() / df.shape[0] * 100), 2)
     print('--------------------------------------------')
@@ -357,7 +357,7 @@ def filtrar_errores(df):
               'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
     mascara = (df['price_usd_per_m2'].notnull()) &\
               (((df['price_usd_per_m2'] < 10000) & (df['place_name'] != 'Puerto Madero') & (df['place_name'] != 'Palermo Chico')) | (df['place_name'].isin(['Puerto Madero','Palermo Chico'])))\
-              & (df['price_aprox_usd'] > 9999)
+              & (df['price_aprox_usd'] > 9999) & (df['surface_total_in_m2'] > 14)
     print('Se eliminaron {} registros por inconsistencias en el campo price_usd_per_m2'.format(
         df.shape[0] - df[mascara].shape[0]))
     print('-------------------SITUACION INICIAL-------------------------')
