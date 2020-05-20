@@ -459,6 +459,6 @@ def df_gen(ruta_origen ='../desafio_ds/properati.csv',ruta_destino='../desafio_d
     completar(df)
     df2 = filtrar_errores(df)
     df2.to_csv(ruta_destino)
-    imputar_floor_room(df2,ruta_destino)
+    imputar_floor_room(ruta_destino)
     pd.set_option('display.max_columns', 5)
 
