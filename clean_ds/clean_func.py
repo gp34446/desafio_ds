@@ -4,6 +4,11 @@ import re
 
 
 def pisos(data):
+    """
+    :param data: datadframe de Properati
+    :return: Calcula el campo floor para los casos null en base a regex que procesan el campo description y
+    asigna 0 a todos los casos donde property type es house o store
+    """
     cont = data['floor'].isna().sum()
     cont_orig = cont
 
@@ -79,6 +84,10 @@ def pisos(data):
 
 
 def precio_aprox_dolar(data):
+    """
+     :param data: datadframe de Properati
+     :return: Calcula el campo precio_aprox_dolar para los casos null en base a regex
+     """
     cont = data['price_aprox_usd'].isna().sum()
     cont_orig = cont
     pattern = '(?P<moneda>(U\$S|US\$|USD|\$US|U\$D)\s?)(?P<monto>\d+(\.\d+)?)'
@@ -105,8 +114,14 @@ def precio_aprox_dolar(data):
     print('Porcentaje de NULLs corregidos para price_aprox_usd: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
 
 
-def amenities(data, lista=['pileta|piscina', 'terraza|solarium', 'cochera|garage', 'patio|jardin', 'laundry|lavadero',
-                           'parrilla|churrasquera|asadera', 'zoom']):
+def amenities(data, lista=['pileta|piscina', 'terraza|solarium', 'cochera|garage', 'patio|jardin', 'laundry|lavadero','parrilla|churrasquera|asadera', 'zoom']):
+    """
+    :param data: dataframe de properati
+    :param lista: list con amenities a buscar en en el campo description
+    :return: Asigna al dataframe las columnas que figuran en lista,
+    el valor de la misma sera 1 si encuentra la palabra de la lista en el campo description y 0 en el caso contrario.
+    Tambien asigna la columna AMENITIES con la suma de los valores de todos los campos encontrados para cada registros
+    """
     total = data.shape[0]
     for i in lista:
         pattern = i
@@ -124,6 +139,12 @@ def amenities(data, lista=['pileta|piscina', 'terraza|solarium', 'cochera|garage
 
 
 def m2(df):
+    """
+       :param data: datadframe de Properati
+       :return: Calcula el campo price_usd_per_m2 para los casos null en base al cociente
+        de price_aprox_usd por surface_total_in_m2.
+        Para ello llama a la funcion superfice_total para completar el campo surface_total_in_m2
+    """
     superficie_total(df)
     precio_aprox_dolar(df)
     cont_orig = df['price_usd_per_m2'].isnull().sum()
@@ -134,11 +155,15 @@ def m2(df):
     print('Registros actualizados para price_usd_per_m2: {}'.format(cont_orig - cont))
     print('Total original de NULLs para price_usd_per_m2: {}'.format(cont_orig))
     print('Total actual de NULLs para price_usd_per_m2: {}'.format(cont))
-    print(
-        'Porcentaje de NULLs corregidos para price_usd_per_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
+    print('Porcentaje de NULLs corregidos para price_usd_per_m2: {}%'.format(round((100 - (cont * 100) / cont_orig)), 0))
 
 
 def superficie_cubierta(data):
+    """
+    :param data: datadframe de Properati
+    :return: Asigna el nuevo campo covered_surface al dataframe en base a regex que procesan el
+    campo description.
+    """
     cont = data['surface_covered_in_m2'].isna().sum()
     cont_orig = cont
     pattern = '(?P<sup>\sCUBIERT(A|O|AS|OS)(\s|:|:\s)?)(?P<nro>\d{2,4}[.,]?\d*)'
@@ -179,6 +204,12 @@ def superficie_cubierta(data):
 
 
 def superficie_total(data):
+    """
+    :param data: datadframe de Properati
+    :return: Calcula el campo surface_total_in_m2 para los casos null en base a regex que procesan el campo description.
+             Tambien adiciona el campo uncovered_surface utilizando regex, y suma lo al campo covere_surface para calcular
+             tota_surface en los casos que el campo no haya sido completado por las regex iniciales.
+    """
     cont = data['surface_total_in_m2'].isna().sum()
     cont_orig = cont
     superficie_cubierta(data)
@@ -247,6 +278,10 @@ def superficie_total(data):
 
 
 def expensas(data):
+    """
+       :param data: datadframe de Properati
+       :return: Calcula el campo expences para los casos null en base a regex que procesan el campo description.
+    """
     cont = data['expenses'].isna().sum()
     cont_orig = cont
 
@@ -281,6 +316,10 @@ def expensas(data):
 
 
 def rooms(df):
+    """
+         :param data: datadframe de Properati
+         :return: Calcula el campo rooms para los casos null en base a regex que procesan el campo description.
+      """
     cont = df['rooms'].isna().sum()
     cont_orig = cont
 
@@ -337,6 +376,11 @@ def rooms(df):
 
 def completar(df, lista_amenities=['pileta|piscina', 'terraza|solarium', 'cochera|garage', 'patio|jardin',
                                    'laundry|lavadero', 'parrilla|churrasquera|asadera']):
+    """
+    :param df: DataFrame de properati
+    :param lista_amenities: lista con todas las palabras que se pretende buscar para crear campos de amenities
+    :return: Completa el dataframe de properati aplicando todas las funciones para campos de interes
+    """
     campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
               'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
     aux = round(df[campos].isnull().sum() / df.shape[0] * 100), 2
@@ -353,6 +397,13 @@ def completar(df, lista_amenities=['pileta|piscina', 'terraza|solarium', 'cocher
 
 
 def filtrar_errores(df):
+    """
+
+    :param df: DataFrame de properati
+    :return: devuelve el dataframe filtrado de registros con errores de datos para los campos
+             price_usd_per_m2, surface_total_in_m2 y price_aprox_usd
+
+    """
     campos = ['property_type', 'place_name', 'state_name', 'price_aprox_usd', 'surface_total_in_m2',
               'surface_covered_in_m2', 'price_usd_per_m2', 'floor', 'rooms', 'expenses']
     mascara = (df['price_usd_per_m2'].notnull()) &\
@@ -373,6 +424,11 @@ def filtrar_errores(df):
     print('--------------------------------------------')
     return df[mascara]
 def imputar_floor_room(ruta='../desafio_ds/df_clean.csv'):
+    """
+
+    :param ruta: ruta donde se lee y escribe el file con las imputaciones.
+    :return: Imputa a los campos floor, room y expenses valores en base a la media de los mismos agrupada por state_name y place_name
+    """
     data = pd.read_csv(ruta)
     g = data.groupby(['state_name', 'place_name']).agg({'expenses': 'mean','floor': 'mean', 'rooms': 'mean'})
     g = pd.DataFrame(g)
@@ -391,11 +447,18 @@ def imputar_floor_room(ruta='../desafio_ds/df_clean.csv'):
     data3 = data2.drop(['expenses_mean','floor_mean', 'rooms_mean'], axis=1)
     data3.to_csv(ruta)
     print(round(data3.isnull().sum() / data3.shape[0] * 100), 2)
-def df_gen(df):
+def df_gen(ruta_origen ='../desafio_ds/properati.csv',ruta_destino='../desafio_ds/df_clean.csv'):
+    """
+
+    :param ruta_origen: ruta del dataframe de properati
+    :param ruta_destino: ruta donde se escribira el dataframe corregido
+    :return: aplica las funciones completar, filtar_errores y imputar_floor_room
+    """
     pd.set_option('display.max_columns', None)
+    df = pd.read_csv(ruta_origen)
     completar(df)
     df2 = filtrar_errores(df)
-    df2.to_csv('../desafio_ds/df_clean.csv')
-    imputar_floor_room()
+    df2.to_csv(ruta_destino)
+    imputar_floor_room(df2,ruta_destino)
     pd.set_option('display.max_columns', 5)
 
