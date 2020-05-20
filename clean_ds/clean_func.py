@@ -447,16 +447,18 @@ def imputar_floor_room(ruta='../desafio_ds/df_clean.csv'):
     data3 = data2.drop(['expenses_mean','floor_mean', 'rooms_mean'], axis=1)
     data3.to_csv(ruta)
     print(round(data3.isnull().sum() / data3.shape[0] * 100), 2)
-def df_gen(ruta_origen ='../desafio_ds/properati.csv',ruta_destino='../desafio_ds/df_clean.csv'):
+def df_gen(ruta_origen ='../desafio_ds/properati.csv',ruta_destino='../desafio_ds/df_clean.csv',lista_amenities=['pileta|piscina', 'terraza|solarium', 'cochera|garage', 'patio|jardin',
+                                   'laundry|lavadero', 'parrilla|churrasquera|asadera']):
     """
 
     :param ruta_origen: ruta del dataframe de properati
     :param ruta_destino: ruta donde se escribira el dataframe corregido
+    :param lista_amenities: lista para la funcion completar
     :return: aplica las funciones completar, filtar_errores y imputar_floor_room
     """
     pd.set_option('display.max_columns', None)
     df = pd.read_csv(ruta_origen)
-    completar(df)
+    completar(df,lista_amenities)
     df2 = filtrar_errores(df)
     df2.to_csv(ruta_destino)
     imputar_floor_room(ruta_destino)
